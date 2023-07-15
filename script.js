@@ -117,6 +117,9 @@ const cities = [
     "Wisconsin",
     "Wyoming",
   ];
+
+   // API key for OpenWeatherMap
+  const apiKey = "d08207a4722998af528aab8b151c510a";
   
   const cityInput = document.getElementById("cityInput");
   const stateInput = document.getElementById("stateInput");
@@ -174,8 +177,7 @@ const cities = [
 
   // Retrieving user input and fetch weather data from API
 function fetchWeatherData(city, state) {
-    // API key for OpenWeatherMap
-    const apiKey = "d08207a4722998af528aab8b151c510a";
+   
   
     // Attempt at taking API call to fetch weather data based on city and state
     const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city},${state}&appid=${apiKey}&units=imperial`;
@@ -188,6 +190,7 @@ function fetchWeatherData(city, state) {
         document.getElementById("temperature").textContent = `Temperature: ${data.main.temp} °F`;
       })
       .catch(error => {
+        alert("An error occurred while fetching the weather data. Please try again later.");
         console.log("Error fetching weather data:", error);
       });
   }
@@ -200,18 +203,6 @@ function fetchWeatherData(city, state) {
     fetchWeatherData(city, state);
   });
 
-  const apiKey = 'd08207a4722998af528aab8b151c510a';
-
-// Function to fetch weather data from the OpenWeatherMap API
-async function getWeather(city, state) {
-  const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city},${state}&appid=${apiKey}`);
-  const data = await response.json();
-  return data;
-}
-
-function updateStateDisplay(state) {
-  document.getElementById('state').textContent = `State: ${state}`;
-}
 
 // Function to update the weather information on the page
 function updateWeatherDisplay(city, temperature, description) {
@@ -220,7 +211,8 @@ function updateWeatherDisplay(city, temperature, description) {
 }
 
 // Event listener for the search button
-document.getElementById('searchButton').addEventListener('click', async () => {
+document.getElementById("forecastButton").addEventListener("click", async () => {
+  // ...
   const cityInput = document.getElementById('cityInput');
   const stateInput = document.getElementById('stateInput');
   const city = cityInput.value.trim();
@@ -242,4 +234,69 @@ document.getElementById('searchButton').addEventListener('click', async () => {
     console.error(error);
   }
 });
+
+// Function to fetch forecast data from the OpenWeatherMap API
+async function getForecast(city, state) {
+  const response = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city},${state}&appid=${apiKey}`);
+  const data = await response.json();
+  return data;
+}
+
+
+// have redone this so many times and can't figure it out 
+// Event listener for the forecast button
+document.getElementById("forecastButton").addEventListener("click", async () => {
+  const cityInput = document.getElementById("cityInput");
+  const stateInput = document.getElementById("stateInput");
+  const city = cityInput.value.trim();
+  const state = stateInput.value.trim();
+
+  if (city === "" || state === "") {
+    alert("Please enter a valid city and state.");
+    return;
+  }
+
+  try {
+    const forecastData = await getForecast(city, state);
+    const forecastList = forecastData.list;
+
+    // Get the current date
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0); // Set time to midnight for accurate comparison
+
+    // Filter the forecast data for the next 7 days
+    const next7DaysForecast = forecastList.filter((forecastItem, index) => {
+      const forecastDate = new Date(forecastItem.dt_txt);
+      forecastDate.setHours(0, 0, 0, 0); // Set time to midnight for accurate comparison
+      const timeDifference = forecastDate.getTime() - currentDate.getTime();
+      const isNext7Days = timeDifference >= 0 && timeDifference < 7 * 24 * 60 * 60 * 1000;
+      return isNext7Days && index % 8 === 0; //
+    });
+
+    // Display the filtered forecast data
+    const forecastDisplay = document.getElementById("forecastDisplay");
+    forecastDisplay.innerHTML = ""; 
+
+    for (let i = 0; i < next7DaysForecast.length; i++) {
+      const forecastItem = next7DaysForecast[i];
+      const date = new Date(forecastItem.dt_txt);
+      const temperature = forecastItem.main.temp; 
+      const description = forecastItem.weather[0].description;
+
+      const forecastItemElement = document.createElement("div");
+      forecastItemElement.innerHTML = `${date.toLocaleDateString()} - Temperature: ${temperature}°C, Description: ${description}`;
+      forecastDisplay.appendChild(forecastItemElement);
+    }
+
+    // Update the weather information on the page
+    const currentWeatherData = forecastList[0]; //list for current weather
+    const currentTemperature = currentWeatherData.main.temp;
+    const currentDescription = currentWeatherData.weather[0].description;
+    updateWeatherDisplay(city, currentTemperature, currentDescription);
+  } catch (error) {
+    alert("An error occurred while fetching the forecast data. Please try again later.");
+    console.error(error);
+  }
+});
+
 
