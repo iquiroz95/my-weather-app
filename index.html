@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+
+    <title>Weather App</title>
+</head>
+
+<body>
+    <header>
+        <h1>Weather Dashboard</h1>
+
+        <!--Trying to edit state displayed on top left of page -->
+        <div id="state">State: </div>
+        <div id="search">
+             <!--Button for user to look up city and state-->
+            <input type="text" id="cityInput" placeholder="Enter City">
+            <input type="text" id="stateInput" placeholder="Enter State">
+            <button id="searchButton">Search</button>
+            <div id="cityOptions"></div>
+            <div id="stateOptions"></div> <!-- Added div for state options -->
+        </div>    
+    </header>
+
+    <section id="weatherDisplay">
+        <div id="cityName">City: </div>
+        <div id="temperature">Temperature: </div>
+        <div id="weatherDescription">Descripton: </div>
+    </section>
+
+    <!-- Rest of weather app content goes here -->
+
+</body>
+<script src="script.js"></script>
+</html>
